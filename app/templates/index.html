@@ -1,1 +1,30 @@
-# Web page template for user interactions
+<!-- Web page template for user interactions -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForecastFit</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="home-page">
+    <h1>ForecastFit</h1>
+    <form action="/subscribe" method="POST">
+        <!-- Location input -->
+        <label for="location">Enter your Zip Code:</label>
+        <input type="text" id="location" name="location" placeholder="44113" required>
+    
+        <!-- Phone number input -->
+        <label for="phone">Enter your phone number:</label>
+        <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="1234567890" required>
+    
+        <!-- Notification time input -->
+        <label for="time">Preferred notification time:</label>
+        <input type="time" id="time" name="time" required>
+    
+        <button type="submit">Subscribe</button>
+    </form>
+    
+</body>
+</html>
