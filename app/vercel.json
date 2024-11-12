@@ -1,0 +1,4 @@
+{
+    "public": "app/static",
+    "rewrites": [ { "source": "/(.*)", "destination": "/app/$1" } ]
+}  
