@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ForecastFit</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body class="home_page">
     <header>
@@ -36,10 +36,10 @@
 
             const formData = new FormData(this);
 
-            fetch(window.location.origin + "/subscribe", {
+            fetch("/subscribe", {
                 method: "POST",
                 body: formData
-            })            
+            })
             .then(response => response.json())
             .then(data => {
                 // Hide the form and display the success message in the same container
