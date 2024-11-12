@@ -36,10 +36,10 @@
 
             const formData = new FormData(this);
 
-            fetch("/subscribe", {
+            fetch(window.location.origin + "/subscribe", {
                 method: "POST",
                 body: formData
-            })
+            })            
             .then(response => response.json())
             .then(data => {
                 // Hide the form and display the success message in the same container
