@@ -1,8 +1,11 @@
 from flask import Flask, jsonify, request, render_template
 import requests
+import os
 
 app = Flask(__name__)
-WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
+
+# Retrieve the API key from environment variables in vercel
+WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY")
 
 def fetch_weather_data(zip_code, days):
     """
@@ -24,7 +27,7 @@ def today_hourly():
     """
     Get today's weather with hourly data for a specified zip code.
     """
-    zip_code = request.args.get('zip', '44113')  # Defaulted to display the zip code of 44113 if user does not provide one
+    zip_code = request.args.get('zip', '44113')  # Default to zip code 44113 if not provided
     data = fetch_weather_data(zip_code, 1)
     return jsonify(data)
 
@@ -33,7 +36,7 @@ def three_day_forecast():
     """
     Get a 3-day weather forecast for a specified zip code.
     """
-    zip_code = request.args.get('zip', '44113')  # Defaulted to display the zip code of 44113 if user does not provide one
+    zip_code = request.args.get('zip', '44113')  # Default to zip code 44113 if not provided
     data = fetch_weather_data(zip_code, 3)
     return jsonify(data)
 
