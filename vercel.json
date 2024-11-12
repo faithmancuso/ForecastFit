@@ -1,10 +1,5 @@
 {
-    "builds": [
-        { "src": "app/main.py", "use": "@vercel/python" }
-    ],
-    "routes": [
-        { "src": "/static/(.*)", "dest": "/app/static/$1" },
-        { "src": "/subscribe", "dest": "/app/main.py" },
-        { "src": "/(.*)", "dest": "/app/templates/index.html" }
-    ]
-}
+    "version": 2,
+    "builds": [ { "src": "app/main.py", "use": "@vercel/python" } ],
+    "routes": [ { "src": "/(.*)", "dest": "app/main.py" } ]
+}  
