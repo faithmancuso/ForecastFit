@@ -36,7 +36,7 @@
 
             const formData = new FormData(this);
 
-            fetch("https://forecast-fit.vercel.app/subscribe", {
+            fetch("/subscribe", {
                 method: "POST",
                 body: formData
             })
