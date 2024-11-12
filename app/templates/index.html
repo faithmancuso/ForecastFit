@@ -1,54 +1,185 @@
-<!-- Web page template for user interactions -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ForecastFit</title>
-    <link rel="stylesheet" href="static/style.css">
+    <title>ForecastFit - Local Weather</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body class="home_page">
     <header>
         <h1>ForecastFit</h1>
     </header>
     <main>
-        <div id="form-container">
-            <form id="subscription-form">
-                <label for="location">Enter your Zip Code:</label>
-                <input type="text" id="location" name="location" placeholder="44113" required>
+        <section id="weather-section">
+            <div id="weather-options">
+                <label for="zip-code-input">Enter your Zip Code for local weather:</label>
+                <input type="text" id="zip-code-input" placeholder="44113" required>
+                <button onclick="fetchWeather()">Submit</button>
 
-                <label for="phone">Enter your phone number:</label>
-                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="1234567890" required>
+                <div id="forecast-buttons">
+                    <button onclick="showToday()">Today (Hourly)</button>
+                    <button onclick="show3Day()">3-Day Forecast</button>
+                </div>
+            </div>
 
-                <label for="time">Preferred notification time:</label>
-                <input type="time" id="time" name="time" required>
+            <div id="today-weather" class="weather-container" style="display: none;">
+                <h2>Today's Weather (Hourly)</h2>
+                <div id="hourly-forecast"></div>
+            </div>
+            <div id="forecast-3-days" class="weather-container" style="display: none;">
+                <h2>3-Day Forecast</h2>
+                <div id="daily-forecast"></div>
+            </div>
+        </section>
 
-                <button type="submit">Subscribe</button>
-            </form>
-            <div id="success-message" style="display: none; font-size: 18px; color: black;"></div>
-        </div>
+        <!-- Right-side widgets container -->
+        <section id="right-widgets">
+            <!-- Subscribe Form -->
+            <div id="form-container">
+                <h3>Enter your Zip Code:</h3>
+                <input type="text" placeholder="44113">
+                <h3>Enter your phone number:</h3>
+                <input type="tel" placeholder="1234567890">
+                <h3>Preferred notification time:</h3>
+                <input type="time" value="07:00">
+                <button>Subscribe</button>
+            </div>
+
+            <!-- Placeholder for Clothing and Accessory Recommendations -->
+            <div class="widget">
+                <h3>Clothing and Accessory Recommendations for Today:</h3>
+                <p>Coming soon...</p>
+            </div>
+
+            <!-- Sunrise and Sunset Widget -->
+            <div class="widget">
+                <h3>Sunrise & Sunset</h3>
+                <p id="sunrise">Sunrise: --:--</p>
+                <p id="sunset">Sunset: --:--</p>
+            </div>
+
+            <!-- Moon Phase Widget -->
+            <div class="widget">
+                <h3>Moon Phase</h3>
+                <p id="moon-phase">Moon Phase: --</p>
+            </div>
+        </section>
     </main>
 
     <script>
-        document.getElementById("subscription-form").addEventListener("submit", function(event) {
-            event.preventDefault();
+        let userZip = "44113";
 
-            const formData = new FormData(this);
+        function fetchWeather() {
+            userZip = document.getElementById("zip-code-input").value || "44113";
+            showToday();
+            loadSunriseSunsetMoonData();
+        }
 
-            fetch("/subscribe", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Hide the form and display the success message in the same container
-                document.getElementById("subscription-form").style.display = "none";
-                document.getElementById("success-message").style.display = "block";
-                document.getElementById("success-message").innerHTML = data.message;
-            })
-            .catch(error => console.error("Error:", error));
-        });
+        function formatTimeTo12Hour(timeString) {
+            const [hour, minute] = timeString.split(":");
+            let hourNum = parseInt(hour);
+            const period = hourNum >= 12 ? "PM" : "AM";
+            hourNum = hourNum % 12 || 12;
+            return `${hourNum}:${minute} ${period}`;
+        }
+
+        function formatDate(dateString) {
+            const options = { month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        async function showToday() {
+            document.getElementById("today-weather").style.display = "block";
+            document.getElementById("forecast-3-days").style.display = "none";
+
+            try {
+                const response = await fetch(`/weather/today-hourly?zip=${userZip}`);
+                const data = await response.json();
+                const hourlyForecast = data.forecast.forecastday[0]?.hour;
+
+                const hourlyContainer = document.getElementById('hourly-forecast');
+                hourlyContainer.innerHTML = '';
+
+                if (!hourlyForecast) {
+                    hourlyContainer.innerHTML = '<p>Error: Unable to load hourly forecast data.</p>';
+                    return;
+                }
+
+                hourlyForecast.forEach(hour => {
+                    const hourBlock = document.createElement('div');
+                    hourBlock.className = 'hour-block';
+                    hourBlock.innerHTML = `
+                        <span><strong>${formatTimeTo12Hour(hour.time.split(" ")[1])}</strong></span>
+                        <span>Temp: ${hour.temp_f ? hour.temp_f + '°F' : 'N/A'}</span>
+                        <span>Humidity: ${hour.humidity ? hour.humidity + '%' : 'N/A'}</span>
+                        <span>Wind: ${hour.wind_mph ? hour.wind_mph + ' mph ' + hour.wind_dir : 'N/A'}</span>
+                        <span>${hour.condition?.text || 'N/A'}</span>
+                    `;
+                    hourlyContainer.appendChild(hourBlock);
+                });
+            } catch (error) {
+                console.error("Error loading hourly weather:", error);
+                document.getElementById('hourly-forecast').innerHTML = '<p>Error loading hourly data.</p>';
+            }
+        }
+
+        async function show3Day() {
+            document.getElementById("today-weather").style.display = "none";
+            document.getElementById("forecast-3-days").style.display = "block";
+
+            try {
+                const response = await fetch(`/weather/3-day?zip=${userZip}`);
+                const data = await response.json();
+                const dailyForecast = data.forecast.forecastday;
+
+                const dailyContainer = document.getElementById('daily-forecast');
+                dailyContainer.innerHTML = '';
+
+                if (!dailyForecast) {
+                    dailyContainer.innerHTML = '<p>Error: Unable to load 3-day forecast data.</p>';
+                    return;
+                }
+
+                dailyForecast.forEach(day => {
+                    const dayBlock = document.createElement('div');
+                    dayBlock.className = 'day-block';
+                    dayBlock.innerHTML = `
+                        <p><strong>${formatDate(day.date)}</strong></p>
+                        <p>High: ${day.day.maxtemp_f ? day.day.maxtemp_f + '°F' : 'N/A'} / Low: ${day.day.mintemp_f ? day.day.mintemp_f + '°F' : 'N/A'}</p>
+                        <p>Humidity: ${day.day.avghumidity ? day.day.avghumidity + '%' : 'N/A'}</p>
+                        <p>Wind: ${day.day.maxwind_mph ? day.day.maxwind_mph + ' mph ' + day.day.wind_dir : 'N/A'}</p>
+                        <p>${day.day.condition?.text || 'N/A'}</p>
+                    `;
+                    dailyContainer.appendChild(dayBlock);
+                });
+            } catch (error) {
+                console.error("Error loading 3-day weather:", error);
+                document.getElementById('daily-forecast').innerHTML = '<p>Error loading 3-day forecast data.</p>';
+            }
+        }
+
+        async function loadSunriseSunsetMoonData() {
+            try {
+                const response = await fetch(`/weather/today-hourly?zip=${userZip}`);
+                const data = await response.json();
+                const todayForecast = data.forecast.forecastday[0].astro;
+
+                document.getElementById("sunrise").textContent = `Sunrise: ${todayForecast.sunrise}`;
+                document.getElementById("sunset").textContent = `Sunset: ${todayForecast.sunset}`;
+                document.getElementById("moon-phase").textContent = `Moon Phase: ${todayForecast.moon_phase}`;
+            } catch (error) {
+                console.error("Error loading sunrise, sunset, and moon data:", error);
+                document.getElementById("sunrise").textContent = "Sunrise: N/A";
+                document.getElementById("sunset").textContent = "Sunset: N/A";
+                document.getElementById("moon-phase").textContent = "Moon Phase: N/A";
+            }
+        }
+
+        window.onload = function() {
+            showToday();
+            loadSunriseSunsetMoonData();
+        };
     </script>
 </body>
 </html>

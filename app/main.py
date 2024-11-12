@@ -1,25 +1,41 @@
-# Main application code to run the server
-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, jsonify, request, render_template
+import requests
 
 app = Flask(__name__)
+WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
 
-@app.route("/")
+def fetch_weather_data(zip_code, days):
+    """
+    Fetch weather data for a specified number of days.
+    """
+    url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={zip_code}&days={days}"
+    response = requests.get(url)
+    return response.json()
+
+@app.route('/')
 def home():
-    return render_template("index.html")
+    """
+    Serve the homepage.
+    """
+    return render_template('index.html')
 
-@app.route("/subscribe", methods=["POST"])
-def subscribe():
-    # Extract form data (location, phone, time)
-    location = request.form.get("location")
-    phone = request.form.get("phone")
-    time = request.form.get("time")
-    
-    # Log or process the data as needed
-    print(f"Received subscription: Location={location}, Phone={phone}, Time={time}")
-    
-    # Return a JSON response with the success message
-    return jsonify(message="Subscription successful!")
+@app.route('/weather/today-hourly', methods=['GET'])
+def today_hourly():
+    """
+    Get today's weather with hourly data for a specified zip code.
+    """
+    zip_code = request.args.get('zip', '44113')  # Defaulted to display the zip code of 44113 if user does not provide one
+    data = fetch_weather_data(zip_code, 1)
+    return jsonify(data)
 
-if __name__ == "__main__":
+@app.route('/weather/3-day', methods=['GET'])
+def three_day_forecast():
+    """
+    Get a 3-day weather forecast for a specified zip code.
+    """
+    zip_code = request.args.get('zip', '44113')  # Defaulted to display the zip code of 44113 if user does not provide one
+    data = fetch_weather_data(zip_code, 3)
+    return jsonify(data)
+
+if __name__ == '__main__':
     app.run(debug=True)
