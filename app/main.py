@@ -1,10 +1,8 @@
 # Main application code to run the server
 
 from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://forecast-fit.vercel.app"}})
 
 @app.route("/")
 def home():
