@@ -1,6 +1,3 @@
 {
-    "public": "app/templates",
-    "rewrites": [
-        { "source": "/(.*)", "destination": "/app/templates/$1" }
-    ]
+    "rewrites": [ { "source": "/(.*)", "destination": "/app/templates/$1" }]
 }
