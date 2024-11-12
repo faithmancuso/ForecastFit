@@ -1,4 +1,5 @@
 # Main application code to run the server
+
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
