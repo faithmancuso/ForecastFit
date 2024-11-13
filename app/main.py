@@ -1,14 +1,8 @@
-import os
 from flask import Flask, jsonify, request, render_template
 import requests
-from dotenv import load_dotenv
 
-# app = Flask(__name__)
-# WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
-
-load_dotenv()
 app = Flask(__name__)
-WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
+WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
 
 def fetch_weather_data(zip_code, days):
     """
