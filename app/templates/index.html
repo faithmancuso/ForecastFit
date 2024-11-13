@@ -4,64 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ForecastFit - Local Weather</title>
+    
+    <!-- Link to Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Link to your style.css -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="home_page">
-    <header>
-        <h1>ForecastFit</h1>
+<body class="home_page" style="background-image: url('/static/background.jpg'); background-size: cover; background-position: center; background-attachment: fixed; height: 100vh;">
+    <header class="translucent">
+        <h1>ForecastFit <i class="fas fa-cloud-sun"></i></h1> <!-- Weather Icon added to the header -->
     </header>
+    
     <main>
-        <section id="weather-section">
+        <section id="weather-section" class="translucent">
             <div id="weather-options">
-                <label for="zip-code-input">Enter your Zip Code for local weather:</label>
+                <label for="zip-code-input"><i class="fas fa-map-marker-alt"></i> Enter your Zip Code for local weather:</label>
                 <input type="text" id="zip-code-input" placeholder="44113" required>
-                <button onclick="fetchWeather()">Submit</button>
+                <button onclick="fetchWeather()"><i class="fas fa-check"></i> Submit</button>
 
                 <div id="forecast-buttons">
-                    <button onclick="showToday()">Today (Hourly)</button>
-                    <button onclick="show3Day()">3-Day Forecast</button>
+                    <button onclick="showToday()"><i class="fas fa-calendar-day"></i> Today (Hourly)</button>
+                    <button onclick="show3Day()"><i class="fas fa-calendar-week"></i> 3-Day Forecast</button>
                 </div>
             </div>
 
             <div id="today-weather" class="weather-container" style="display: none;">
-                <h2>Today's Weather (Hourly)</h2>
+                <h2>Today's Weather (Hourly) <i class="fas fa-clock"></i></h2> <!-- Clock Icon added to Today's Weather -->
                 <div id="hourly-forecast"></div>
             </div>
             <div id="forecast-3-days" class="weather-container" style="display: none;">
-                <h2>3-Day Forecast</h2>
+                <h2>3-Day Forecast <i class="fas fa-calendar"></i></h2> <!-- Calendar Icon added to 3-Day Forecast -->
                 <div id="daily-forecast"></div>
             </div>
         </section>
 
         <!-- Right-side widgets container -->
-        <section id="right-widgets">
+        <section id="right-widgets" class="translucent">
             <!-- Subscribe Form -->
-            <div id="form-container">
-                <h3>Enter your Zip Code:</h3>
+            <div id="form-container" class="translucent">
+                <h3><i class="fas fa-map-marker-alt"></i> Enter your Zip Code:</h3>
                 <input type="text" placeholder="44113">
-                <h3>Enter your phone number:</h3>
+                <h3><i class="fas fa-phone-alt"></i> Enter your phone number:</h3>
                 <input type="tel" placeholder="1234567890">
-                <h3>Preferred notification time:</h3>
+                <h3><i class="fas fa-clock"></i> Preferred notification time:</h3>
                 <input type="time" value="07:00">
-                <button>Subscribe</button>
+                <button><i class="fas fa-bell"></i> Subscribe</button>
             </div>
 
             <!-- Placeholder for Clothing and Accessory Recommendations -->
-            <div class="widget">
-                <h3>Clothing and Accessory Recommendations for Today:</h3>
+            <div class="widget" class="translucent">
+                <h3><i class="fas fa-tshirt"></i> Clothing and Accessory Recommendations for Today:</h3>
                 <p>Coming soon...</p>
             </div>
 
             <!-- Sunrise and Sunset Widget -->
-            <div class="widget">
-                <h3>Sunrise & Sunset</h3>
-                <p id="sunrise">Sunrise: --:--</p>
-                <p id="sunset">Sunset: --:--</p>
+            <div class="widget" class="translucent">
+                <h3><i class="fas fa-sun"></i> Sunrise & Sunset</h3>
+                <p id="sunrise"><i class="fas fa-sun"></i> Sunrise: --:--</p>
+                <p id="sunset"><i class="fas fa-moon"></i> Sunset: --:--</p>
             </div>
 
             <!-- Moon Phase Widget -->
-            <div class="widget">
-                <h3>Moon Phase</h3>
+            <div class="widget" class="translucent">
+                <h3><i class="fas fa-moon"></i> Moon Phase</h3>
                 <p id="moon-phase">Moon Phase: --</p>
             </div>
         </section>

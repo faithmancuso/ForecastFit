@@ -8,10 +8,22 @@ body.home_page {
     align-items: center;
 }
 
+/* Translucent background effect */
+.translucent {
+    background-color: rgba(255, 255, 255, 0.569); /* White with 80% opacity */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.323);
+    color: #333; /* Dark color for text readability */
+}
+
 header {
     width: 100%;
     text-align: center;
     margin-top: 20px;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Subtle shadow for better readability */
+
 }
 
 h1 {
@@ -55,12 +67,13 @@ main {
 
 #weather-options button {
     padding: 8px 12px;
-    background-color: #4CAF50;
+    background-color: #44a9cad8;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: medium;
+    transition: background-color 0.3s ease;
 }
 
 #forecast-buttons {
@@ -71,7 +84,7 @@ main {
 
 #forecast-buttons button {
     padding: 8px 12px;
-    background-color: #4CAF50;
+    background-color: #44a9cad8;
     color: white;
     border: none;
     border-radius: 4px;
@@ -127,7 +140,7 @@ main {
 
 #form-container button {
     padding: 10px 15px;
-    background-color: #4CAF50;
+    background-color: #44a9cad8;
     color: white;
     border: none;
     border-radius: 4px;
