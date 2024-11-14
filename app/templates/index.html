@@ -55,7 +55,9 @@
             <!-- Placeholder for Clothing and Accessory Recommendations -->
             <div class="widget" class="translucent">
                 <h3><i class="fas fa-tshirt"></i> Clothing and Accessory Recommendations for Today:</h3>
-                <p>Coming soon...</p>
+                <div id="clothing-recommendations">
+                    <p>Loading recommendations...</p>
+                </div>
             </div>
 
             <!-- Sunrise and Sunset Widget -->
@@ -95,6 +97,32 @@
             return new Date(dateString).toLocaleDateString(undefined, options);
         }
 
+        function getClothingRecommendations(temperature, condition) {
+            let recommendations = [];
+
+            // Temperature-based clothing recommendations
+            if (temperature < 50) {
+                recommendations.push("Wear a warm jacket or coat.");
+            } else if (temperature >= 50 && temperature < 65) {
+                recommendations.push("A light jacket or sweater should be enough.");
+            } else if (temperature >= 65 && temperature < 75) {
+                recommendations.push("It's a mild day, a t-shirt or long-sleeve shirt will be fine.");
+            } else {
+                recommendations.push("Wear something cool like a short-sleeve shirt or tank top.");
+            }
+
+            // Weather condition-based accessories recommendations
+            if (condition.toLowerCase().includes("rain")) {
+                recommendations.push("Don't forget your umbrella or rain jacket.");
+            } else if (condition.toLowerCase().includes("sun")) {
+                recommendations.push("Sunglasses and sunscreen are a good idea.");
+            } else if (condition.toLowerCase().includes("snow")) {
+                recommendations.push("Wear snow boots and a warm scarf.");
+            }
+
+            return recommendations;
+        }
+
         async function showToday() {
             document.getElementById("today-weather").style.display = "block";
             document.getElementById("forecast-3-days").style.display = "none";
@@ -103,6 +131,27 @@
                 const response = await fetch(`/weather/today-hourly?zip=${userZip}`);
                 const data = await response.json();
                 const hourlyForecast = data.forecast.forecastday[0]?.hour;
+                
+                // Get today's temperature and condition for recommendations
+                const todayTemperature = hourlyForecast[0]?.temp_f;
+                const todayCondition = hourlyForecast[0]?.condition?.text;
+
+                // Get clothing recommendations based on temperature and condition
+                const clothingRecommendations = getClothingRecommendations(todayTemperature, todayCondition);
+
+                // Display clothing recommendations
+                const clothingContainer = document.getElementById('clothing-recommendations');
+                clothingContainer.innerHTML = '';
+                
+                if (clothingRecommendations.length > 0) {
+                    clothingRecommendations.forEach(rec => {
+                        const recElement = document.createElement('p');
+                        recElement.textContent = rec;
+                        clothingContainer.appendChild(recElement);
+                    });
+                } else {
+                    clothingContainer.innerHTML = '<p>Unable to provide clothing recommendations at the moment.</p>';
+                }
 
                 const hourlyContainer = document.getElementById('hourly-forecast');
                 hourlyContainer.innerHTML = '';
@@ -129,6 +178,7 @@
                 document.getElementById('hourly-forecast').innerHTML = '<p>Error loading hourly data.</p>';
             }
         }
+
 
         async function show3Day() {
             document.getElementById("today-weather").style.display = "none";
