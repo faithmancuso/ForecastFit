@@ -55,7 +55,7 @@ main {
 
 #weather-options label {
     font-size: 16px;
-    color: white;
+    color: rgb(0, 0, 0);
 }
 
 #weather-options input[type="text"] {

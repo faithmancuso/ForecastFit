@@ -18,6 +18,12 @@
     
     <main>
         <section id="weather-section" class="translucent">
+                <!-- Radio buttons for temperature unit selection -->
+                <div id="unit-selection">
+                    <label><input type="radio" name="tempUnit" value="F" checked> Fahrenheit</label>
+                    <label><input type="radio" name="tempUnit" value="C"> Celsius</label>
+                </div>
+                
             <div id="weather-options">
                 <label for="zip-code-input"><i class="fas fa-map-marker-alt"></i> Enter your Zip Code for local weather:</label>
                 <input type="text" id="zip-code-input" placeholder="44113" required>
@@ -121,6 +127,20 @@
             }
 
             return recommendations;
+        }
+
+        // Conversion functions
+        function fahrenheitToCelsius(f) {
+            return ((f - 32) * 5 / 9).toFixed(1);
+        }
+
+        function celsiusToFahrenheit(c) {
+            return ((c * 9 / 5) + 32).toFixed(1);
+        }
+
+        // Function to get the selected temperature unit
+        function getSelectedUnit() {
+            return document.querySelector('input[name="tempUnit"]:checked').value;
         }
 
         async function showToday() {
