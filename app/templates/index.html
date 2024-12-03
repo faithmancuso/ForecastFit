@@ -104,7 +104,7 @@
         }
 
         function getClothingRecommendations(temperature, condition, tempUnit) {
-            let recommendation = "";
+            let recommendation = [];
         
             // Convert temperature to Celsius if it's in Fahrenheit
             if (tempUnit === 'F') {
@@ -145,7 +145,7 @@
                 recommendation += "Bundle up with a heavy-duty insulated coat, thermal pants, and layers to cover your face and extremities. Goggles can help protect your eyes from snow and wind. ";
             }
         
-            return recommendation || "No specific recommendations available for the current weather.";
+            return recommendation;
         }
         
 
