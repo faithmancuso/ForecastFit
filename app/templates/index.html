@@ -145,7 +145,7 @@
         
             try {
                 const tempUnit = getSelectedUnit();
-                const response = await fetch(`/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
+                const response = await fetch(`https://forecastfit.onrender.com/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
                 const data = await response.json();
                 const hourlyForecast = data.forecast.forecastday[0]?.hour;
         
