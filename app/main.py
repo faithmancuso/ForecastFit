@@ -2,9 +2,8 @@ from flask import Flask, jsonify, request, render_template
 import requests
 from flask_cors import CORS
 
-CORS(app)  # Enable CORS for all routes
-
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
 
 def fetch_weather_data(zip_code, days, temp_unit='F'):
