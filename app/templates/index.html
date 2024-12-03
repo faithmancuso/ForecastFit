@@ -82,6 +82,8 @@
     </main>
 
     <script>
+        const API_BASE_URL = 'https://forecastfit.onrender.com';
+
         let userZip = "44113";
 
         function fetchWeather() {
@@ -264,7 +266,7 @@
         async function loadSunriseSunsetMoonData() {
             try {
                 const tempUnit = getSelectedUnit();
-                const response = await fetch(`/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
+                const response = await fetch(`https://forecastfit.onrender.com/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
                 const data = await response.json();
                 const todayForecast = data.forecast.forecastday[0].astro;
 
