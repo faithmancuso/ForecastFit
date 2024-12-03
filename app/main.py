@@ -3,7 +3,8 @@ import requests
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["https://forecast-fit.com", "http://127.0.0.1:5000"]}})
+# Explicitly allow requests from your live domain
+CORS(app, resources={r"/*": {"origins": "https://www.forecast-fit.com"}})
 WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
 
 def fetch_weather_data(zip_code, days, temp_unit='F'):
