@@ -104,33 +104,50 @@
         }
 
         function getClothingRecommendations(temperature, condition, tempUnit) {
+            if (temperature == null || condition == null) {
+                return ["Unable to provide clothing recommendations."];
+            }
+        
             let recommendations = [];
-
             // Convert temperature to Celsius if it's in Fahrenheit
             if (tempUnit === 'F') {
                 temperature = (temperature - 32) * 5 / 9;
             }
-
+        
             // Temperature-based clothing recommendations
-            if (temperature < 0) {
-                recommendations.push("Wear a warm jacket or coat.");
-            } else if (temperature >= 0 && temperature < 10) {
-                recommendations.push("A light jacket or sweater should be enough.");
-            } else if (temperature >= 10 && temperature < 20) {
-                recommendations.push("It's a mild day, a t-shirt or long-sleeve shirt will be fine.");
-            } else {
-                recommendations.push("Wear something cool like a short-sleeve shirt or tank top.");
+            if (temperature < -18) {
+                recommendations.push("Wear a heavy insulated coat and fleece-lined pants. Consider layering with thermal underwear. Insulated boots and warm socks are essential.");
+            } else if (temperature >= -18 && temperature <= 0) {
+                recommendations.push("Opt for a winter coat, a sweater or thermal layer, and thick pants like jeans paired with thermal leggings. Insulated boots and warm socks are essential.");
+            } else if (temperature > 0 && temperature <= 10) {
+                recommendations.push("A light winter jacket or puffer coat, paired with a sweater or hoodie, is ideal. Wear jeans and closed-toe shoes.");
+            } else if (temperature > 10 && temperature <= 18) {
+                recommendations.push("Choose a lightweight or denim jacket with a long-sleeve shirt or light sweater. Pants or leggings work well with any closed-toe shoes.");
+            } else if (temperature > 18 && temperature <= 24) {
+                recommendations.push("Wear a T-shirt with a light jacket if needed. Pair with lightweight pants or shorts and casual shoes like sneakers or sandals.");
+            } else if (temperature > 24 && temperature <= 29) {
+                recommendations.push("Stick to lightweight clothing like a T-shirt or tank top and shorts or a dress. Comfortable footwear like sandals or breathable sneakers is best.");
+            } else if (temperature > 29 && temperature <= 35) {
+                recommendations.push("Opt for light cotton or linen clothing to stay cool, such as shorts or a flowy dress. Sandals or flip-flops are ideal. Consider carrying a water bottle to stay hydrated and don’t forget your sunscreen.");
+            } else if (temperature > 35) {
+                recommendations.push("Opt for ultra-lightweight, breathable fabrics like linen or moisture-wicking materials. Wear sleeveless tops, shorts, or airy dresses. Stick to sandals or open-toe shoes to stay cool. Carry a water bottle to stay hydrated, and don’t forget your sunscreen.");
             }
-
+        
             // Weather condition-based accessories recommendations
-            if (condition.toLowerCase().includes("rain")) {
-                recommendations.push("Don't forget your umbrella or rain jacket.");
-            } else if (condition.toLowerCase().includes("sun")) {
-                recommendations.push("Sunglasses and sunscreen are a good idea.");
+            if (condition.toLowerCase().includes("sun")) {
+                recommendations.push("Carry your sunglasses or a brimmed hat.");
+            } else if (condition.toLowerCase().includes("rain")) {
+                recommendations.push("Wear a waterproof jacket or raincoat paired with waterproof boots. Carry an umbrella for convenience.");
             } else if (condition.toLowerCase().includes("snow")) {
-                recommendations.push("Wear snow boots and a warm scarf.");
+                recommendations.push("Make sure your boots are waterproof and wear a warm scarf.");
+            } else if (condition.toLowerCase().includes("hail")) {
+                recommendations.push("Wear waterproof gloves and sturdy boots with good traction. For small hail, a sturdy umbrella can be useful.");
+            } else if (condition.toLowerCase().includes("wind")) {
+                recommendations.push("A windbreaker or jacket is a good choice. A scarf or neck gaiter can protect against wind chill, and tie long hair back if needed.");
+            } else if (condition.toLowerCase().includes("blizzard")) {
+                recommendations.push("Bundle up with a heavy-duty insulated coat, thermal pants, and layers to cover your face and extremities. Goggles can help protect your eyes from snow and wind.");
             }
-
+        
             return recommendations;
         }
 
@@ -154,7 +171,13 @@
                 const todayCondition = hourlyForecast[0]?.condition?.text;
         
                 // Get clothing recommendations based on temperature and condition
-                const clothingRecommendations = getClothingRecommendations(todayTemperature, todayCondition, tempUnit);
+                let clothingRecommendations = "Default recommendation unavailable.";
+                if (todayTemperature != null && todayCondition != null) {
+                    clothingRecommendations = getClothingRecommendations(todayTemperature, todayCondition, tempUnit);
+                }
+
+                console.log("Clothing Recommendations:", clothingRecommendations); // Optional
+
         
                 // Display clothing recommendations
                 const clothingContainer = document.getElementById('clothing-recommendations');
@@ -173,10 +196,11 @@
                 const hourlyContainer = document.getElementById('hourly-forecast');
                 hourlyContainer.innerHTML = '';
         
-                if (!hourlyForecast) {
-                    hourlyContainer.innerHTML = '<p>Error: Unable to load hourly forecast data.</p>';
+                if (!hourlyForecast || hourlyForecast.length === 0) {
+                    hourlyContainer.innerHTML = '<p>No hourly weather data available.</p>';
                     return;
                 }
+                
         
                 hourlyForecast.forEach(hour => {
                     const hourBlock = document.createElement('div');
