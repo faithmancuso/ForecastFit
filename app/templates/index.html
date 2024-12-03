@@ -142,24 +142,24 @@
         async function showToday() {
             document.getElementById("today-weather").style.display = "block";
             document.getElementById("forecast-3-days").style.display = "none";
-
+        
             try {
                 const tempUnit = getSelectedUnit();
                 const response = await fetch(`/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
                 const data = await response.json();
                 const hourlyForecast = data.forecast.forecastday[0]?.hour;
-
+        
                 // Get today's temperature and condition for recommendations
                 const todayTemperature = tempUnit === 'F' ? hourlyForecast[0]?.temp_f : hourlyForecast[0]?.temp_c;
                 const todayCondition = hourlyForecast[0]?.condition?.text;
-
+        
                 // Get clothing recommendations based on temperature and condition
                 const clothingRecommendations = getClothingRecommendations(todayTemperature, todayCondition, tempUnit);
-
+        
                 // Display clothing recommendations
                 const clothingContainer = document.getElementById('clothing-recommendations');
                 clothingContainer.innerHTML = '';
-
+        
                 if (clothingRecommendations.length > 0) {
                     clothingRecommendations.forEach(rec => {
                         const recElement = document.createElement('p');
@@ -169,15 +169,15 @@
                 } else {
                     clothingContainer.innerHTML = '<p>Unable to provide clothing recommendations at the moment.</p>';
                 }
-
+        
                 const hourlyContainer = document.getElementById('hourly-forecast');
                 hourlyContainer.innerHTML = '';
-
+        
                 if (!hourlyForecast) {
                     hourlyContainer.innerHTML = '<p>Error: Unable to load hourly forecast data.</p>';
                     return;
                 }
-
+        
                 hourlyForecast.forEach(hour => {
                     const hourBlock = document.createElement('div');
                     hourBlock.className = 'hour-block';
@@ -195,25 +195,29 @@
                 document.getElementById('hourly-forecast').innerHTML = '<p>Error loading hourly data.</p>';
             }
         }
-
+        
         async function show3Day() {
             document.getElementById("today-weather").style.display = "none";
             document.getElementById("forecast-3-days").style.display = "block";
-
+        
+            // Update clothing recommendations for the 3-day forecast
+            const clothingContainer = document.getElementById('clothing-recommendations');
+            clothingContainer.innerHTML = '<p>Switch to the hourly weather to get today\'s clothing recommendations.</p>';
+        
             try {
                 const tempUnit = getSelectedUnit();
                 const response = await fetch(`/weather/3-day?zip=${userZip}&temp_unit=${tempUnit}`);
                 const data = await response.json();
                 const dailyForecast = data.forecast.forecastday;
-
+        
                 const dailyContainer = document.getElementById('daily-forecast');
                 dailyContainer.innerHTML = '';
-
+        
                 if (!dailyForecast) {
                     dailyContainer.innerHTML = '<p>Error: Unable to load 3-day forecast data.</p>';
                     return;
                 }
-
+        
                 dailyForecast.forEach(day => {
                     const dayBlock = document.createElement('div');
                     dayBlock.className = 'day-block';
@@ -231,6 +235,7 @@
                 document.getElementById('daily-forecast').innerHTML = '<p>Error loading 3-day forecast data.</p>';
             }
         }
+        
 
         async function loadSunriseSunsetMoonData() {
             try {
