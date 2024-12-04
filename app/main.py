@@ -1,15 +1,33 @@
 from flask import Flask, jsonify, request, render_template
 import requests
 from flask_cors import CORS
-
+import os
+from apscheduler.schedulers.background import BackgroundScheduler
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-# Explicitly allow requests from our live domain
 CORS(app, resources={r"/*": {"origins": "https://www.forecast-fit.com"}})
+load_dotenv()
+
+API_KEY = os.getenv('TEXTBELT_API_KEY')
 WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
-
-
 subscriptions = []
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+def send_sms(phone_number, message):
+    response = requests.post('https://textbelt.com/text', {
+        'phone': phone_number,
+        'message': message,
+        'key': API_KEY,
+    })
+    return response.json()
+
+def notify_users():
+    for user in subscriptions:
+        send_sms(user['phone'], 'Your daily weather notification.')
+
+scheduler.add_job(func=notify_users, trigger="interval", hours=24)
 
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
@@ -27,18 +45,15 @@ def subscribe():
         "zip": zip_code
     })
 
+    scheduler.add_job(func=send_sms, trigger='cron', hour=int(time.split(':')[0]), minute=int(time.split(':')[1]), args=[phone, 'Your daily weather notification.'])
+
     return jsonify({"message": "Subscription successful!"}), 200
 
-
 def fetch_weather_data(zip_code, days, temp_unit='F'):
-    """
-    Fetch weather data for a specified number of days.
-    """
     url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={zip_code}&days={days}"
     response = requests.get(url)
     data = response.json()
 
-    # Convert temperatures if necessary
     if temp_unit == 'C':
         for day in data['forecast']['forecastday']:
             day['day']['maxtemp_c'] = (day['day']['maxtemp_f'] - 32) * 5 / 9
@@ -52,16 +67,10 @@ def fetch_weather_data(zip_code, days, temp_unit='F'):
 
 @app.route('/')
 def home():
-    """
-    Serve the homepage.
-    """
     return render_template('index.html')
 
 @app.route('/weather/today-hourly', methods=['GET'])
 def today_hourly():
-    """
-    Get today's weather with hourly data for a specified zip code.
-    """
     zip_code = request.args.get('zip', '44113')
     temp_unit = request.args.get('temp_unit', 'F')
     data = fetch_weather_data(zip_code, 1, temp_unit)
@@ -69,9 +78,6 @@ def today_hourly():
 
 @app.route('/weather/3-day', methods=['GET'])
 def three_day_forecast():
-    """
-    Get a 3-day weather forecast for a specified zip code.
-    """
     zip_code = request.args.get('zip', '44113')
     temp_unit = request.args.get('temp_unit', 'F')
     data = fetch_weather_data(zip_code, 3, temp_unit)
