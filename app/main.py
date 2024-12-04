@@ -13,6 +13,9 @@ CORS(app, resources={r"/*": {"origins": "https://www.forecast-fit.com"}})
 WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
 TEXTBELT_API_KEY = os.getenv('TEXTBELT_API_KEY')
 
+if not TEXTBELT_API_KEY:
+    print("Error: TEXTBELT_API_KEY is not set. SMS functionality will not work!")
+
 def send_sms(phone, message):
     response = requests.post('https://textbelt.com/text', {
         'phone': phone,
@@ -34,7 +37,10 @@ def subscribe():
     zip_code = data.get('zip')
 
     if not phone or not time or not zip_code:
+        print("Missing fields in subscription request.")
         return jsonify({"error": "All fields are required."}), 400
+
+    print(f"Received subscription: Phone={phone}, Time={time}, Zip={zip_code}")
 
     # Save the subscription to the database
     conn = sqlite3.connect('subscriptions.db')
@@ -43,12 +49,28 @@ def subscribe():
     conn.commit()
     conn.close()
 
-    # Send SMS confirmation
+    # Attempt to send SMS
+    print("Attempting to send SMS...")
     sms_response = send_sms(phone, f"Thank you for subscribing! Weather updates will be sent at {time}.")
+    print(f"SMS Response: {sms_response}")  # Log the response for debugging
+
     if not sms_response.get('success'):
+        print(f"SMS failed with error: {sms_response.get('error')}")
         return jsonify({"error": "Subscription saved, but SMS failed to send."}), 500
 
     return jsonify({"message": "Subscription successful!"}), 200
+
+
+
+@app.route('/test-env', methods=['GET'])
+def test_env():
+    """
+    Test if environment variables are loaded properly.
+    """
+    return jsonify({
+        "TEXTBELT_API_KEY": TEXTBELT_API_KEY is not None,
+        "TEXTBELT_API_KEY (value)": TEXTBELT_API_KEY
+    })
 
 
 def fetch_weather_data(zip_code, days, temp_unit='F'):
