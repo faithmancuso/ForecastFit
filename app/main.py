@@ -42,6 +42,13 @@ def subscribe():
 
     print(f"Received subscription: Phone={phone}, Time={time}, Zip={zip_code}")
 
+    # Save the subscription to the database
+    conn = sqlite3.connect('subscriptions.db')
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO subscriptions (phone, time, zip_code) VALUES (?, ?, ?)', (phone, time, zip_code))
+    conn.commit()
+    conn.close()
+
     # Attempt to send SMS
     print("Attempting to send SMS...")
     sms_response = send_sms(phone, f"Thank you for subscribing! Weather updates will be sent at {time}.")
