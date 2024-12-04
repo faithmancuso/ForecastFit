@@ -21,6 +21,14 @@ TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
 # Create Twilio client
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
+def send_sms(to, body):
+    message = client.messages.create(
+        body=body,
+        from_=TWILIO_PHONE_NUMBER,
+        to=to
+    )
+    return message.sid
+
 # In-memory storage for subscriptions
 subscriptions = []
 
