@@ -4,6 +4,7 @@ from flask_cors import CORS
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
+import sqlite3
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://www.forecast-fit.com"}})
@@ -14,6 +15,23 @@ WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
 subscriptions = []
 scheduler = BackgroundScheduler()
 scheduler.start()
+
+# SQLite database setup
+DB_PATH = 'subscribers.db'
+
+def init_db():
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS subscribers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            zip_code TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            notification_time TEXT NOT NULL,
+            consent BOOLEAN NOT NULL
+        )
+        """)
+        conn.commit()
 
 def send_sms(phone_number, message):
     response = requests.post('https://textbelt.com/text', {
@@ -32,22 +50,27 @@ scheduler.add_job(func=notify_users, trigger="interval", hours=24)
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
     data = request.json
-    phone = data.get('phone')
-    time = data.get('time')
-    zip_code = data.get('zip')
+    zip_code = data.get("zip")
+    phone = data.get("phone")
+    time = data.get("time")
+    consent = data.get("consent")
 
-    if not phone or not time or not zip_code:
-        return jsonify({"error": "All fields are required."}), 400
+    if not zip_code or not phone or not time or not consent:
+        return jsonify({"error": "All fields are required"}), 400
 
-    subscriptions.append({
-        "phone": phone,
-        "time": time,
-        "zip": zip_code
-    })
-
-    scheduler.add_job(func=send_sms, trigger='cron', hour=int(time.split(':')[0]), minute=int(time.split(':')[1]), args=[phone, 'Your daily weather notification.'])
-
-    return jsonify({"message": "Subscription successful!"}), 200
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+            query = """
+            INSERT INTO subscribers (zip_code, phone, notification_time, consent)
+            VALUES (?, ?, ?, ?)
+            """
+            cursor.execute(query, (zip_code, phone, time, consent))
+            conn.commit()
+            return jsonify({"message": "Subscription successful"}), 200
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+        return jsonify({"error": "Database error occurred"}), 500
 
 def fetch_weather_data(zip_code, days, temp_unit='F'):
     url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={zip_code}&days={days}"
@@ -84,4 +107,5 @@ def three_day_forecast():
     return jsonify(data)
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True)
