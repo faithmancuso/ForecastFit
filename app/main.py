@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, render_template
 import requests
 from flask_cors import CORS
 
+
 app = Flask(__name__)
 # Explicitly allow requests from our live domain
 CORS(app, resources={r"/*": {"origins": "https://www.forecast-fit.com"}})
@@ -16,10 +17,9 @@ def subscribe():
     phone = data.get('phone')
     time = data.get('time')
     zip_code = data.get('zip')
-    consent = data.get('consent')
 
-    if not phone or not time or not zip_code or not consent:
-        return jsonify({"error": "All fields are required, and consent must be provided."}), 400
+    if not phone or not time or not zip_code:
+        return jsonify({"error": "All fields are required."}), 400
 
     subscriptions.append({
         "phone": phone,
@@ -28,7 +28,6 @@ def subscribe():
     })
 
     return jsonify({"message": "Subscription successful!"}), 200
-
 
 
 def fetch_weather_data(zip_code, days, temp_unit='F'):

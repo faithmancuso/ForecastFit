@@ -306,38 +306,33 @@
             const phone = document.getElementById('subscribe-phone').value;
             const time = document.getElementById('subscribe-time').value;
             const consent = document.getElementById('subscribe-consent').checked;
-
+        
             if (zip && phone && time && consent) {
+                // Display success notification
+                const notification = document.getElementById('subscribe-notification');
+                notification.style.display = 'block';
+        
+                // Hide the notification after 10 seconds
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 10000);
+        
+                // Send data to the backend (API call)
                 fetch('/subscribe', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ zip, phone, time, consent }),
-                })
-                .then(response => {
-                    if (response.ok) {
-                        const notification = document.getElementById('subscribe-notification');
-                        notification.style.display = 'block';
-
-                        setTimeout(() => {
-                            notification.style.display = 'none';
-                        }, 10000);
-                    } else {
-                        return response.json().then(errorData => {
-                            console.error('Subscription error:', errorData);
-                            alert('Error subscribing. Please try again.');
-                        });
+                }).then(response => {
+                    if (!response.ok) {
+                        console.error('Error subscribing:', response.statusText);
                     }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    alert('Error subscribing. Please try again.');
-                });
+                }).catch(error => console.error('Fetch error:', error));
             } else {
                 alert('Please fill out all fields and agree to receive SMS notifications before subscribing.');
             }
-        }
+        }    
     </script>
 </body>
 </html>
