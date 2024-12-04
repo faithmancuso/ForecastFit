@@ -46,6 +46,7 @@
         </section>
 
         <!-- Right-side widgets container -->
+        <!-- Right-side widgets container -->
         <section id="right-widgets" class="translucent">
             <!-- Subscribe Form -->
             <div id="form-container" class="translucent">
@@ -66,6 +67,9 @@
                 <button onclick="subscribeUser()"><i class="fas fa-bell"></i> Subscribe</button>
             </div>
             
+
+            </div>
+
 
             <!-- Placeholder for Clothing and Accessory Recommendations -->
             <div class="widget" class="translucent">
@@ -294,40 +298,42 @@
             showToday();
             loadSunriseSunsetMoonData();
         };
-
+    </script>
+    <script>
         function subscribeUser() {
             const zip = document.getElementById('subscribe-zip').value;
             const phone = document.getElementById('subscribe-phone').value;
             const time = document.getElementById('subscribe-time').value;
             const consent = document.getElementById('subscribe-consent').checked;
-        
+    
             if (zip && phone && time && consent) {
-                // Display success notification
-                const notification = document.getElementById('subscribe-notification');
-                notification.style.display = 'block';
-        
-                // Hide the notification after 10 seconds
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 10000);
-        
-                // Send data to the backend (API call)
+                // Send data to the backend
                 fetch('/subscribe', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ zip, phone, time, consent }),
-                }).then(response => {
-                    if (!response.ok) {
-                        console.error('Error subscribing:', response.statusText);
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Show success notification
+                        const notification = document.getElementById('subscribe-notification');
+                        notification.style.display = 'block';
+    
+                        // Hide the notification after 10 seconds
+                        setTimeout(() => {
+                            notification.style.display = 'none';
+                        }, 10000);
+                    } else {
+                        alert('Error subscribing. Please try again.');
                     }
-                }).catch(error => console.error('Fetch error:', error));
+                })
+                .catch(error => console.error('Fetch error:', error));
             } else {
                 alert('Please fill out all fields and agree to receive SMS notifications before subscribing.');
             }
         }
-        
     </script>
 </body>
 </html>
