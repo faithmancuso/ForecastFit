@@ -42,23 +42,26 @@ def subscribe():
 
     print(f"Received subscription: Phone={phone}, Time={time}, Zip={zip_code}")
 
-    # Save the subscription to the database
-    conn = sqlite3.connect('subscriptions.db')
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO subscriptions (phone, time, zip_code) VALUES (?, ?, ?)', (phone, time, zip_code))
-    conn.commit()
-    conn.close()
-
     # Attempt to send SMS
     print("Attempting to send SMS...")
     sms_response = send_sms(phone, f"Thank you for subscribing! Weather updates will be sent at {time}.")
-    print(f"SMS Response: {sms_response}")  # Log the response for debugging
+    print(f"SMS Response: {sms_response}")
 
     if not sms_response.get('success'):
         print(f"SMS failed with error: {sms_response.get('error')}")
         return jsonify({"error": "Subscription saved, but SMS failed to send."}), 500
 
     return jsonify({"message": "Subscription successful!"}), 200
+
+
+@app.route('/test-sms', methods=['GET'])
+def test_sms():
+    phone = "4406686654"
+    message = "This is a test SMS from ForecastFit."
+    print("Sending test SMS...")
+    response = send_sms(phone, message)
+    print(f"Test SMS Response: {response}")
+    return jsonify(response)
 
 
 
