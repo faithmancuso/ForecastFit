@@ -54,16 +54,6 @@ def subscribe():
     return jsonify({"message": "Subscription successful!"}), 200
 
 
-@app.route('/test-sms', methods=['GET'])
-def test_sms():
-    phone = "4406686654"
-    message = "This is a test SMS from ForecastFit."
-    print("Sending test SMS...")
-    response = send_sms(phone, message)
-    print(f"Test SMS Response: {response}")
-    return jsonify(response)
-
-
 
 @app.route('/test-env', methods=['GET'])
 def test_env():
