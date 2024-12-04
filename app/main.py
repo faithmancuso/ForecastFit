@@ -98,5 +98,20 @@ def three_day_forecast():
     data = fetch_weather_data(zip_code, 3, temp_unit)
     return jsonify(data)
 
+
+# testing sms
+@app.route('/test-sms', methods=['GET'])
+def test_sms():
+    phone = request.args.get('phone')
+    message = "This is a test message."
+    if phone:
+        sid = send_sms(phone, message)
+        return jsonify({"message": f"Test SMS sent with SID: {sid}"}), 200
+    return jsonify({"error": "Phone number is required."}), 400
+
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
