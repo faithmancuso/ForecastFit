@@ -19,8 +19,8 @@ def send_sms(phone, message):
         'message': message,
         'key': TEXTBELT_API_KEY,
     })
+    print(f"Textbelt Response: {response.json()}")  # Logs the API response
     return response.json()
-
 
 subscriptions = []
 
