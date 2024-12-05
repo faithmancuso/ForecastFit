@@ -317,12 +317,12 @@
                 }, 10000);
         
                 // Send data to the backend (API call)
-                fetch('https://forecastfit.onrender.com/subscribe', {
+                fetch('/subscribe', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ zip, phone, time }),
+                    body: JSON.stringify({ zip, phone, time, consent }),
                 }).then(response => {
                     if (!response.ok) {
                         console.error('Error subscribing:', response.statusText);

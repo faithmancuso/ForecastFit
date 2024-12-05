@@ -87,8 +87,7 @@ def subscribe():
     print(f"Received subscription: Phone={phone}, Time={time}, Zip={zip_code}")
 
     # Save the subscription to the database
-    db_path = os.path.join(os.path.dirname(__file__), 'subscriptions.db')
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect('subscriptions.db')
     cursor = conn.cursor()
     cursor.execute('INSERT INTO subscriptions (phone, time, zip_code) VALUES (?, ?, ?)', (phone, time, zip_code))
     conn.commit()
