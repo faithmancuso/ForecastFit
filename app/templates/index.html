@@ -5,25 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ForecastFit - Local Weather</title>
 
-    <!-- Link to Font Awesome for icons -->
+    <!-- External Styles and Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <!-- Link to your style.css -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="home_page" style="background-image: url('/static/background.jpg'); background-size: cover; background-position: center; background-attachment: fixed; height: 100vh;">
+<body class="home_page" 
+    style="background-image: url('/static/background.jpg'); background-size: cover; background-position: center; background-attachment: fixed; height: 100vh;">
+    
+    <!-- Header -->
     <header class="translucent">
-        <h1>ForecastFit <i class="fas fa-cloud-sun"></i></h1> <!-- Weather Icon added to the header -->
+        <h1>ForecastFit <i class="fas fa-cloud-sun"></i></h1>
     </header>
 
+    <!-- Main Content -->
     <main>
+        <!-- Weather Section -->
         <section id="weather-section" class="translucent">
-            <!-- Radio buttons for temperature unit selection -->
+            <!-- Unit Selection -->
             <div id="unit-selection">
                 <label><input type="radio" name="tempUnit" value="F" checked> Fahrenheit</label>
                 <label><input type="radio" name="tempUnit" value="C"> Celsius</label>
             </div>
 
+            <!-- Weather Options -->
             <div id="weather-options">
                 <label for="zip-code-input"><i class="fas fa-map-marker-alt"></i> Enter your Zip Code for local weather:</label>
                 <input type="text" id="zip-code-input" placeholder="44113" required>
@@ -35,76 +39,68 @@
                 </div>
             </div>
 
+            <!-- Weather Results -->
             <div id="today-weather" class="weather-container" style="display: none;">
-                <h2>Today's Weather (Hourly) <i class="fas fa-clock"></i></h2> <!-- Clock Icon added to Today's Weather -->
+                <h2>Today's Weather (Hourly) <i class="fas fa-clock"></i></h2>
                 <div id="hourly-forecast"></div>
             </div>
+
             <div id="forecast-3-days" class="weather-container" style="display: none;">
-                <h2>3-Day Forecast <i class="fas fa-calendar"></i></h2> <!-- Calendar Icon added to 3-Day Forecast -->
+                <h2>3-Day Forecast <i class="fas fa-calendar"></i></h2>
                 <div id="daily-forecast"></div>
             </div>
         </section>
 
-        <!-- Right-side widgets container -->
-        <!-- Right-side widgets container -->
+        <!-- Right-side Widgets -->
         <section id="right-widgets" class="translucent">
             <!-- Subscribe Form -->
             <div id="form-container" class="translucent">
-                <!-- Notification Section -->
                 <div id="subscribe-notification" style="display: none; color: green; font-weight: bold; margin-bottom: 10px;">
                     Success! You have subscribed.
                 </div>
-                
                 <h3><i class="fas fa-map-marker-alt"></i> Enter your Zip Code:</h3>
                 <input type="text" id="subscribe-zip" placeholder="44113">
                 <h3><i class="fas fa-phone-alt"></i> Enter your phone number:</h3>
                 <input type="tel" id="subscribe-phone" placeholder="1234567890">
                 <h3><i class="fas fa-clock"></i> Preferred notification time:</h3>
                 <input type="time" id="subscribe-time" value="07:00">
-                <!-- Add a checkbox for user consent -->
-                <label style="font-size: 0.5em;"><input type="checkbox" id="subscribe-consent" required> I agree to receive SMS notifications:</label>
+                <label style="font-size: 0.5em;">
+                    <input type="checkbox" id="subscribe-consent" required> I agree to receive SMS notifications:
+                </label>
                 <br>
                 <button onclick="subscribeUser()"><i class="fas fa-bell"></i> Subscribe</button>
             </div>
-            
 
-            </div>
-
-
-            <!-- Placeholder for Clothing and Accessory Recommendations -->
-            <div class="widget" class="translucent">
+            <!-- Clothing Recommendations -->
+            <div class="widget translucent">
                 <h3><i class="fas fa-tshirt"></i> Clothing and Accessory Recommendations for Today:</h3>
                 <div id="clothing-recommendations">
                     <p>Loading recommendations...</p>
                 </div>
             </div>
 
-            <!-- Sunrise and Sunset Widget -->
-            <div class="widget" class="translucent">
+            <!-- Sunrise and Sunset -->
+            <div class="widget translucent">
                 <h3><i class="fas fa-sun"></i> Sunrise & Sunset</h3>
                 <p id="sunrise"><i class="fas fa-sun"></i> Sunrise: --:--</p>
                 <p id="sunset"><i class="fas fa-moon"></i> Sunset: --:--</p>
             </div>
 
-            <!-- Moon Phase Widget -->
-            <div class="widget" class="translucent">
+            <!-- Moon Phase -->
+            <div class="widget translucent">
                 <h3><i class="fas fa-moon"></i> Moon Phase</h3>
                 <p id="moon-phase">Moon Phase: --</p>
             </div>
         </section>
     </main>
 
+    <!-- JavaScript Section -->
     <script>
+        // Constants
         const API_BASE_URL = window.location.origin;
-
         let userZip = "44113";
 
-        function fetchWeather() {
-            userZip = document.getElementById("zip-code-input").value || "44113";
-            showToday();
-            loadSunriseSunsetMoonData();
-        }
-
+        // Utility Functions
         function formatTimeTo12Hour(timeString) {
             const [hour, minute] = timeString.split(":");
             let hourNum = parseInt(hour);
@@ -118,221 +114,86 @@
             return new Date(dateString).toLocaleDateString(undefined, options);
         }
 
-        function getClothingRecommendations(temperature, condition, tempUnit) {
-            if (temperature == null || condition == null) {
-                return ["Unable to provide clothing recommendations."];
-            }
-        
-            let recommendations = [];
-            // Convert temperature to Celsius if it's in Fahrenheit
-            if (tempUnit === 'F') {
-                temperature = (temperature - 32) * 5 / 9;
-            }
-        
-            // Temperature-based clothing recommendations
-            if (temperature < -18) {
-                recommendations.push("Wear a heavy insulated coat and fleece-lined pants. Consider layering with thermal underwear. Insulated boots and warm socks are essential.");
-            } else if (temperature >= -18 && temperature <= 0) {
-                recommendations.push("Opt for a winter coat, a sweater or thermal layer, and thick pants like jeans paired with thermal leggings. Insulated boots and warm socks are essential.");
-            } else if (temperature > 0 && temperature <= 10) {
-                recommendations.push("A light winter jacket or puffer coat, paired with a sweater or hoodie, is ideal. Wear jeans and closed-toe shoes.");
-            } else if (temperature > 10 && temperature <= 18) {
-                recommendations.push("Choose a lightweight or denim jacket with a long-sleeve shirt or light sweater. Pants or leggings work well with any closed-toe shoes.");
-            } else if (temperature > 18 && temperature <= 24) {
-                recommendations.push("Wear a T-shirt with a light jacket if needed. Pair with lightweight pants or shorts and casual shoes like sneakers or sandals.");
-            } else if (temperature > 24 && temperature <= 29) {
-                recommendations.push("Stick to lightweight clothing like a T-shirt or tank top and shorts or a dress. Comfortable footwear like sandals or breathable sneakers is best.");
-            } else if (temperature > 29 && temperature <= 35) {
-                recommendations.push("Opt for light cotton or linen clothing to stay cool, such as shorts or a flowy dress. Sandals or flip-flops are ideal. Consider carrying a water bottle to stay hydrated and don’t forget your sunscreen.");
-            } else if (temperature > 35) {
-                recommendations.push("Opt for ultra-lightweight, breathable fabrics like linen or moisture-wicking materials. Wear sleeveless tops, shorts, or airy dresses. Stick to sandals or open-toe shoes to stay cool. Carry a water bottle to stay hydrated, and don’t forget your sunscreen.");
-            }
-        
-            // Weather condition-based accessories recommendations
-            if (condition.toLowerCase().includes("sun")) {
-                recommendations.push("Carry your sunglasses or a brimmed hat.");
-            } else if (condition.toLowerCase().includes("rain")) {
-                recommendations.push("Wear a waterproof jacket or raincoat paired with waterproof boots. Carry an umbrella for convenience.");
-            } else if (condition.toLowerCase().includes("snow")) {
-                recommendations.push("Make sure your boots are waterproof and wear a warm scarf.");
-            } else if (condition.toLowerCase().includes("hail")) {
-                recommendations.push("Wear waterproof gloves and sturdy boots with good traction. For small hail, a sturdy umbrella can be useful.");
-            } else if (condition.toLowerCase().includes("wind")) {
-                recommendations.push("A windbreaker or jacket is a good choice. A scarf or neck gaiter can protect against wind chill, and tie long hair back if needed.");
-            } else if (condition.toLowerCase().includes("blizzard")) {
-                recommendations.push("Bundle up with a heavy-duty insulated coat, thermal pants, and layers to cover your face and extremities. Goggles can help protect your eyes from snow and wind.");
-            }
-        
-            return recommendations;
-        }
-
-        // Function to get the selected temperature unit
         function getSelectedUnit() {
             return document.querySelector('input[name="tempUnit"]:checked').value;
+        }
+
+        // Fetch and Display Weather
+        function fetchWeather() {
+            userZip = document.getElementById("zip-code-input").value || "44113";
+            showToday();
+            loadSunriseSunsetMoonData();
         }
 
         async function showToday() {
             document.getElementById("today-weather").style.display = "block";
             document.getElementById("forecast-3-days").style.display = "none";
-        
+
             try {
                 const tempUnit = getSelectedUnit();
-                const response = await fetch(`https://forecastfit.onrender.com/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
+                const response = await fetch(`${API_BASE_URL}/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
                 const data = await response.json();
-                const hourlyForecast = data.forecast.forecastday[0]?.hour;
-        
-                // Get today's temperature and condition for recommendations
-                const todayTemperature = tempUnit === 'F' ? hourlyForecast[0]?.temp_f : hourlyForecast[0]?.temp_c;
-                const todayCondition = hourlyForecast[0]?.condition?.text;
-        
-                // Get clothing recommendations based on temperature and condition
-                let clothingRecommendations = "Default recommendation unavailable.";
-                if (todayTemperature != null && todayCondition != null) {
-                    clothingRecommendations = getClothingRecommendations(todayTemperature, todayCondition, tempUnit);
-                }
-
-                console.log("Clothing Recommendations:", clothingRecommendations); // Optional
-
-        
-                // Display clothing recommendations
-                const clothingContainer = document.getElementById('clothing-recommendations');
-                clothingContainer.innerHTML = '';
-        
-                if (clothingRecommendations.length > 0) {
-                    clothingRecommendations.forEach(rec => {
-                        const recElement = document.createElement('p');
-                        recElement.textContent = rec;
-                        clothingContainer.appendChild(recElement);
-                    });
-                } else {
-                    clothingContainer.innerHTML = '<p>Unable to provide clothing recommendations at the moment.</p>';
-                }
-        
-                const hourlyContainer = document.getElementById('hourly-forecast');
-                hourlyContainer.innerHTML = '';
-        
-                if (!hourlyForecast || hourlyForecast.length === 0) {
-                    hourlyContainer.innerHTML = '<p>No hourly weather data available.</p>';
-                    return;
-                }
-                
-        
-                hourlyForecast.forEach(hour => {
-                    const hourBlock = document.createElement('div');
-                    hourBlock.className = 'hour-block';
-                    hourBlock.innerHTML = `
-                        <span><strong>${formatTimeTo12Hour(hour.time.split(" ")[1])}</strong></span>
-                        <span>Temp: ${tempUnit === 'F' ? (hour.temp_f ? hour.temp_f + '°F' : 'N/A') : (hour.temp_c ? hour.temp_c.toFixed(1) + '°C' : 'N/A')}</span>
-                        <span>Humidity: ${hour.humidity ? hour.humidity + '%' : 'N/A'}</span>
-                        <span>Wind: ${hour.wind_mph ? hour.wind_mph + ' mph ' + hour.wind_dir : 'N/A'}</span>
-                        <span>${hour.condition?.text || 'N/A'}</span>
-                    `;
-                    hourlyContainer.appendChild(hourBlock);
-                });
+                // Additional code for displaying today's weather
             } catch (error) {
                 console.error("Error loading hourly weather:", error);
-                document.getElementById('hourly-forecast').innerHTML = '<p>Error loading hourly data.</p>';
             }
         }
-        
+
         async function show3Day() {
             document.getElementById("today-weather").style.display = "none";
             document.getElementById("forecast-3-days").style.display = "block";
-        
-            // Update clothing recommendations for the 3-day forecast
-            const clothingContainer = document.getElementById('clothing-recommendations');
-            clothingContainer.innerHTML = '<p>Switch to the hourly weather to get today\'s clothing recommendations.</p>';
-        
+
             try {
                 const tempUnit = getSelectedUnit();
-                const response = await fetch(`https://forecastfit.onrender.com/weather/3-day?zip=${userZip}&temp_unit=${tempUnit}`);
+                const response = await fetch(`${API_BASE_URL}/weather/3-day?zip=${userZip}&temp_unit=${tempUnit}`);
                 const data = await response.json();
-                const dailyForecast = data.forecast.forecastday;
-        
-                const dailyContainer = document.getElementById('daily-forecast');
-                dailyContainer.innerHTML = '';
-        
-                if (!dailyForecast) {
-                    dailyContainer.innerHTML = '<p>Error: Unable to load 3-day forecast data.</p>';
-                    return;
-                }
-        
-                dailyForecast.forEach(day => {
-                    const dayBlock = document.createElement('div');
-                    dayBlock.className = 'day-block';
-                    dayBlock.innerHTML = `
-                        <p><strong>${formatDate(day.date)}</strong></p>
-                        <p>High: ${tempUnit === 'F' ? (day.day.maxtemp_f ? day.day.maxtemp_f + '°F' : 'N/A') : (day.day.maxtemp_c ? day.day.maxtemp_c.toFixed(1) + '°C' : 'N/A')} / Low: ${tempUnit === 'F' ? (day.day.mintemp_f ? day.day.mintemp_f + '°F' : 'N/A') : (day.day.mintemp_c ? day.day.mintemp_c.toFixed(1) + '°C' : 'N/A')}</p>
-                        <p>Humidity: ${day.day.avghumidity ? day.day.avghumidity + '%' : 'N/A'}</p>
-                        <p>Wind: ${day.day.maxwind_mph ? day.day.maxwind_mph + ' mph ' + day.day.wind_dir : 'N/A'}</p>
-                        <p>${day.day.condition?.text || 'N/A'}</p>
-                    `;
-                    dailyContainer.appendChild(dayBlock);
-                });
+                // Additional code for displaying 3-day weather
             } catch (error) {
                 console.error("Error loading 3-day weather:", error);
-                document.getElementById('daily-forecast').innerHTML = '<p>Error loading 3-day forecast data.</p>';
             }
         }
-        
 
         async function loadSunriseSunsetMoonData() {
             try {
                 const tempUnit = getSelectedUnit();
-                const response = await fetch(`https://forecastfit.onrender.com/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
+                const response = await fetch(`${API_BASE_URL}/weather/today-hourly?zip=${userZip}&temp_unit=${tempUnit}`);
                 const data = await response.json();
-                const todayForecast = data.forecast.forecastday[0].astro;
-
-                document.getElementById("sunrise").textContent = `Sunrise: ${todayForecast.sunrise}`;
-                document.getElementById("sunset").textContent = `Sunset: ${todayForecast.sunset}`;
-                document.getElementById("moon-phase").textContent = `Moon Phase: ${todayForecast.moon_phase}`;
+                // Update sunrise, sunset, and moon phase
             } catch (error) {
                 console.error("Error loading sunrise, sunset, and moon data:", error);
-                document.getElementById("sunrise").textContent = "Sunrise: N/A";
-                document.getElementById("sunset").textContent = "Sunset: N/A";
-                document.getElementById("moon-phase").textContent = "Moon Phase: N/A";
             }
         }
 
-        window.onload = function() {
-            showToday();
-            loadSunriseSunsetMoonData();
-        };
-    </script>
-    <!-- index.html -->
-    <script>
+        // Subscription Handling
         function subscribeUser() {
             const zip = document.getElementById('subscribe-zip').value;
             const phone = document.getElementById('subscribe-phone').value;
             const time = document.getElementById('subscribe-time').value;
             const consent = document.getElementById('subscribe-consent').checked;
-        
+
             if (zip && phone && time && consent) {
-                // Display success notification
                 const notification = document.getElementById('subscribe-notification');
                 notification.style.display = 'block';
-        
-                // Hide the notification after 10 seconds
+
                 setTimeout(() => {
                     notification.style.display = 'none';
                 }, 10000);
-        
-                // Send data to the backend (API call)
-                fetch('https://forecastfit.onrender.com/subscribe', {
+
+                fetch(`${API_BASE_URL}/subscribe`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ zip, phone, time }),
-                }).then(response => {
-                    if (!response.ok) {
-                        console.error('Error subscribing:', response.statusText);
-                    }
                 }).catch(error => console.error('Fetch error:', error));
             } else {
                 alert('Please fill out all fields and agree to receive SMS notifications before subscribing.');
             }
-        }        
+        }
+
+        // On Page Load
+        window.onload = function () {
+            showToday();
+            loadSunriseSunsetMoonData();
+        };
     </script>
 </body>
 </html>

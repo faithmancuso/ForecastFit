@@ -1,22 +1,29 @@
 from flask import Flask, jsonify, request, render_template
-import requests
 from flask_cors import CORS
 import requests
 from dotenv import load_dotenv
 import os
+import sqlite3
 
-
+# Initialize Flask app and load environment variables
 app = Flask(__name__)
 load_dotenv()
-# Explicitly allow requests from our live domain
+
+# Enable CORS for the specified domain
 CORS(app, resources={r"/*": {"origins": "https://www.forecast-fit.com"}})
+
+# API Keys
 WEATHER_API_KEY = "3fc72f97a7404f9a8d0213532241211"
 TEXTBELT_API_KEY = os.getenv('TEXTBELT_API_KEY')
 
 if not TEXTBELT_API_KEY:
     print("Error: TEXTBELT_API_KEY is not set. SMS functionality will not work!")
 
+# Helper Functions
 def send_sms(phone, message):
+    """
+    Send SMS using Textbelt API.
+    """
     response = requests.post('https://textbelt.com/text', {
         'phone': phone,
         'message': message,
@@ -25,12 +32,49 @@ def send_sms(phone, message):
     print(f"Textbelt Response: {response.json()}")  # Logs the API response
     return response.json()
 
-subscriptions = []
+def fetch_weather_data(zip_code, days, temp_unit='F'):
+    """
+    Fetch weather data for a specified number of days.
+    """
+    url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={zip_code}&days={days}"
+    response = requests.get(url)
+    data = response.json()
 
-import sqlite3
+    # Convert temperatures if necessary
+    if temp_unit == 'C':
+        for day in data['forecast']['forecastday']:
+            day['day']['maxtemp_c'] = (day['day']['maxtemp_f'] - 32) * 5 / 9
+            day['day']['mintemp_c'] = (day['day']['mintemp_f'] - 32) * 5 / 9
+            day['day']['avgtemp_c'] = (day['day']['avgtemp_f'] - 32) * 5 / 9
+            for hour in day['hour']:
+                hour['temp_c'] = (hour['temp_f'] - 32) * 5 / 9
+                hour['feelslike_c'] = (hour['feelslike_f'] - 32) * 5 / 9
+
+    return data
+
+# Routes
+@app.route('/')
+def home():
+    """
+    Serve the homepage.
+    """
+    return render_template('index.html')
+
+@app.route('/test-env', methods=['GET'])
+def test_env():
+    """
+    Test if environment variables are loaded properly.
+    """
+    return jsonify({
+        "TEXTBELT_API_KEY": TEXTBELT_API_KEY is not None,
+        "TEXTBELT_API_KEY (value)": TEXTBELT_API_KEY
+    })
 
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
+    """
+    Handle subscription requests.
+    """
     data = request.json
     phone = data.get('phone')
     time = data.get('time')
@@ -60,41 +104,11 @@ def subscribe():
 
     return jsonify({"message": "Subscription successful!"}), 200
 
-
-
-@app.route('/test-env', methods=['GET'])
-def test_env():
-    """
-    Test if environment variables are loaded properly.
-    """
-    return jsonify({
-        "TEXTBELT_API_KEY": TEXTBELT_API_KEY is not None,
-        "TEXTBELT_API_KEY (value)": TEXTBELT_API_KEY
-    })
-
-
-def fetch_weather_data(zip_code, days, temp_unit='F'):
-    """
-    Fetch weather data for a specified number of days.
-    """
-    url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={zip_code}&days={days}"
-    response = requests.get(url)
-    data = response.json()
-
-    # Convert temperatures if necessary
-    if temp_unit == 'C':
-        for day in data['forecast']['forecastday']:
-            day['day']['maxtemp_c'] = (day['day']['maxtemp_f'] - 32) * 5 / 9
-            day['day']['mintemp_c'] = (day['day']['mintemp_f'] - 32) * 5 / 9
-            day['day']['avgtemp_c'] = (day['day']['avgtemp_f'] - 32) * 5 / 9
-            for hour in day['hour']:
-                hour['temp_c'] = (hour['temp_f'] - 32) * 5 / 9
-                hour['feelslike_c'] = (hour['feelslike_f'] - 32) * 5 / 9
-
-    return data
-
 @app.route('/subscriptions', methods=['GET'])
 def view_subscriptions():
+    """
+    View all subscriptions.
+    """
     conn = sqlite3.connect('subscriptions.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM subscriptions')
@@ -102,13 +116,6 @@ def view_subscriptions():
     conn.close()
 
     return jsonify({"subscriptions": rows}), 200
-
-@app.route('/')
-def home():
-    """
-    Serve the homepage.
-    """
-    return render_template('index.html')
 
 @app.route('/weather/today-hourly', methods=['GET'])
 def today_hourly():
