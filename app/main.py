@@ -52,52 +52,6 @@ def fetch_weather_data(zip_code, days, temp_unit='F'):
 
     return data
 
-def get_clothing_recommendations(temperature, condition, temp_unit):
-    """
-    Generate clothing recommendations based on temperature and condition.
-    """
-    if temperature is None or condition is None:
-        return ["Unable to provide clothing recommendations."]
-
-    recommendations = []
-    # Convert temperature to Celsius if it's in Fahrenheit
-    if temp_unit == 'F':
-        temperature = (temperature - 32) * 5 / 9
-
-    # Temperature-based clothing recommendations
-    if temperature < -18:
-        recommendations.append("Wear a heavy insulated coat and fleece-lined pants. Consider layering with thermal underwear. Insulated boots and warm socks are essential.")
-    elif -18 <= temperature <= 0:
-        recommendations.append("Opt for a winter coat, a sweater or thermal layer, and thick pants like jeans paired with thermal leggings. Insulated boots and warm socks are essential.")
-    elif 0 < temperature <= 10:
-        recommendations.append("A light winter jacket or puffer coat, paired with a sweater or hoodie, is ideal. Wear jeans and closed-toe shoes.")
-    elif 10 < temperature <= 18:
-        recommendations.append("Choose a lightweight or denim jacket with a long-sleeve shirt or light sweater. Pants or leggings work well with any closed-toe shoes.")
-    elif 18 < temperature <= 24:
-        recommendations.append("Wear a T-shirt with a light jacket if needed. Pair with lightweight pants or shorts and casual shoes like sneakers or sandals.")
-    elif 24 < temperature <= 29:
-        recommendations.append("Stick to lightweight clothing like a T-shirt or tank top and shorts or a dress. Comfortable footwear like sandals or breathable sneakers is best.")
-    elif 29 < temperature <= 35:
-        recommendations.append("Opt for light cotton or linen clothing to stay cool, such as shorts or a flowy dress. Sandals or flip-flops are ideal. Consider carrying a water bottle to stay hydrated and don’t forget your sunscreen.")
-    elif temperature > 35:
-        recommendations.append("Opt for ultra-lightweight, breathable fabrics like linen or moisture-wicking materials. Wear sleeveless tops, shorts, or airy dresses. Stick to sandals or open-toe shoes to stay cool. Carry a water bottle to stay hydrated, and don’t forget your sunscreen.")
-
-    # Weather condition-based accessories recommendations
-    if "sun" in condition.lower():
-        recommendations.append("Carry your sunglasses or a brimmed hat.")
-    elif "rain" in condition.lower():
-        recommendations.append("Wear a waterproof jacket or raincoat paired with waterproof boots. Carry an umbrella for convenience.")
-    elif "snow" in condition.lower():
-        recommendations.append("Make sure your boots are waterproof and wear a warm scarf.")
-    elif "hail" in condition.lower():
-        recommendations.append("Wear waterproof gloves and sturdy boots with good traction. For small hail, a sturdy umbrella can be useful.")
-    elif "wind" in condition.lower():
-        recommendations.append("A windbreaker or jacket is a good choice. A scarf or neck gaiter can protect against wind chill, and tie long hair back if needed.")
-    elif "blizzard" in condition.lower():
-        recommendations.append("Bundle up with a heavy-duty insulated coat, thermal pants, and layers to cover your face and extremities. Goggles can help protect your eyes from snow and wind.")
-
-    return recommendations
-
 # Routes
 @app.route('/')
 def home():
@@ -139,28 +93,9 @@ def subscribe():
     conn.commit()
     conn.close()
 
-    # Fetch weather data for the current day
-    weather_data = fetch_weather_data(zip_code, 1)
-    today_forecast = weather_data['forecast']['forecastday'][0]
-    temp_unit = 'F'  # Assuming the default temperature unit is Fahrenheit
-
-    # Get today's temperature and condition for recommendations
-    today_temperature = today_forecast['day']['avgtemp_f']
-    today_condition = today_forecast['day']['condition']['text']
-
-    # Get clothing recommendations based on temperature and condition
-    clothing_recommendations = get_clothing_recommendations(today_temperature, today_condition, temp_unit)
-
-    # Prepare the SMS message without URLs
-    sms_message = (
-        f"Thank you for subscribing! Weather updates will be sent at {time}.\n"
-        f"Today's Weather: Temp: {today_temperature}°F, Condition: {today_condition}\n"
-        f"Clothing Recommendations: {', '.join(clothing_recommendations)}"
-    )
-
     # Attempt to send SMS
     print("Attempting to send SMS...")
-    sms_response = send_sms(phone, sms_message)
+    sms_response = send_sms(phone, f"Thank you for subscribing! Weather updates will be sent at {time}.")
     print(f"SMS Response: {sms_response}")
 
     if not sms_response.get('success'):
