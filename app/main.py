@@ -4,6 +4,9 @@ import requests
 from dotenv import load_dotenv
 import os
 import sqlite3
+import schedule
+import time
+import threading  # Add this import
 
 # Initialize Flask app and load environment variables
 app = Flask(__name__)
@@ -51,6 +54,29 @@ def fetch_weather_data(zip_code, days, temp_unit='F'):
                 hour['feelslike_c'] = (hour['feelslike_f'] - 32) * 5 / 9
 
     return data
+
+def send_weather_notification(phone_number):
+    message = "weather info..."
+    result = send_sms(phone_number, message)
+    print(f"Sent to {phone_number}: {result}")
+
+def schedule_texts():
+    conn = sqlite3.connect('subscriptions.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT phone, time FROM subscriptions')
+    rows = cursor.fetchall()
+    conn.close()
+
+    for row in rows:
+        phone_number = row[0]
+        time_to_send = row[1]  # Assuming this is in 24-hour format like '15' for 3 PM
+        schedule_time = f"{time_to_send}:00"
+        schedule.every().day.at(schedule_time).do(send_weather_notification, phone_number)
+
+def run_scheduler():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 # Routes
 @app.route('/')
@@ -138,4 +164,12 @@ def three_day_forecast():
     return jsonify(data)
 
 if __name__ == '__main__':
+    # Schedule the texts
+    schedule_texts()
+    
+    # Run the scheduler in a separate thread
+    scheduler_thread = threading.Thread(target=run_scheduler)
+    scheduler_thread.start()
+    
+    # Run the Flask app
     app.run(debug=True)
